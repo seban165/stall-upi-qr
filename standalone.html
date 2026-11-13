@@ -885,22 +885,26 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
     });
 
     function loadSettings() {
-      const savedUpi = localStorage.getItem("stall_upi_id");
-      const savedName = localStorage.getItem("stall_name");
-      const savedMenu = localStorage.getItem("stall_menu_items");
-      const savedTotal = localStorage.getItem("stall_day_total");
-      const savedCount = localStorage.getItem("stall_day_count");
+      let savedUpi = "";
+      let savedName = "";
+      try {
+        savedUpi = localStorage.getItem("stall_upi_id") || "";
+        savedName = localStorage.getItem("stall_name") || "";
+        const savedMenu = localStorage.getItem("stall_menu_items");
+        const savedTotal = localStorage.getItem("stall_day_total");
+        const savedCount = localStorage.getItem("stall_day_count");
 
-      const savedUpi = localStorage.getItem("stall_upi_id") || "";
-      document.getElementById("upi-input").value = savedUpi;
-
-      const savedName = localStorage.getItem("stall_name") || "";
-      document.getElementById("name-input").value = savedName;
-      if (savedMenu) {
-        try { menuItems = JSON.parse(savedMenu); } catch(e){}
+        if (savedMenu) {
+          try { menuItems = JSON.parse(savedMenu); } catch(e){}
+        }
+        if (savedTotal) totalSales = parseFloat(savedTotal) || 0;
+        if (savedCount) salesCount = parseInt(savedCount) || 0;
+      } catch (e) {
+        console.warn("localStorage unavailable:", e);
       }
-      if (savedTotal) totalSales = parseFloat(savedTotal) || 0;
-      if (savedCount) salesCount = parseInt(savedCount) || 0;
+
+      document.getElementById("upi-input").value = savedUpi;
+      document.getElementById("name-input").value = savedName;
 
       validateUpi();
       updateStatsDisplay();
@@ -943,10 +947,14 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
     }
 
     function saveSettings() {
-      const upi = document.getElementById("upi-input").value.trim();
-      const name = document.getElementById("name-input").value.trim();
-      localStorage.setItem("stall_upi_id", upi);
-      localStorage.setItem("stall_name", name);
+      const upi = (document.getElementById("upi-input").value || "").trim();
+      const name = (document.getElementById("name-input").value || "").trim();
+      try {
+        localStorage.setItem("stall_upi_id", upi);
+        localStorage.setItem("stall_name", name);
+      } catch (e) {
+        console.warn("Could not save to localStorage", e);
+      }
       updateDisplay();
       renderPrintCards();
     }
